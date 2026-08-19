@@ -46,6 +46,12 @@ You may freely change:
 - Avoid repeating the same sentence visually and textually.
 - Do not explain what the viewer can already see.
 
+## Brand asset integrity
+
+- Never invent, redesign or approximate a Captionflow logo.
+- If the exact logo asset is not present in the repository, use the `Captionflow` wordmark as clean text instead.
+- Do not substitute a generic AI-generated icon.
+
 ## Implementation
 
 When building a video project, prefer code-driven vector/UI motion that stays crisp at 1080x1920. If no animation stack exists, set up a clean Remotion + React + TypeScript project unless the prompt specifies another toolchain.

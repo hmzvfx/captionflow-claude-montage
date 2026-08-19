@@ -19,8 +19,9 @@ Claude should read these files in order:
 3. `creative/UI_LANGUAGE.md`
 4. `creative/MOTION.md`
 5. `creative/VIDEO_DIRECTION.md`
-6. `creative/ANTI_SLOP.md`
-7. `tokens/captionflow.json`
+6. `creative/PRODUCTION.md`
+7. `creative/ANTI_SLOP.md`
+8. `tokens/captionflow.json`
 
 ## Core principle
 
@@ -37,6 +38,15 @@ Keep the visual identity stable. Vary the storytelling, layouts, transitions, ca
 - No voice-over unless a prompt explicitly asks for it
 - Product/UI motion should carry the story
 - All important text and UI must remain readable on a phone
+
+## Repository structure
+
+- `creative/` — permanent art direction and production language
+- `tokens/` — machine-readable Captionflow visual constants
+- `references/` — provenance and product-source notes
+- `prompts/` — lightweight prompting guidance
+- `videos/` — one self-contained implementation folder per generated video
+- `assets/` — shared assets only when a project actually needs them
 
 ## Source
 

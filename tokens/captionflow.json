@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "name": "Captionflow Motion Tokens",
+    "source": "hmzvfx/captionflowV1.1",
+    "purpose": "Creative reference for motion work, not a 1:1 application theme export"
+  },
+  "canvas": {
+    "defaultWidth": 1080,
+    "defaultHeight": 1920,
+    "orientation": "portrait"
+  },
+  "colors": {
+    "background": "#050509",
+    "backgroundProduct": "#06060A",
+    "surface": "#0B0C12",
+    "surfaceAlt": "#0E1015",
+    "surfaceHover": "#11131B",
+    "foreground": "#F7F7F8",
+    "foregroundBright": "#FAFAFF",
+    "muted": "#8B8E99",
+    "accent": "#795CFF",
+    "accentCore": "#7357FF",
+    "accentHover": "#8C74FF",
+    "blue": "#69ADFF",
+    "landingBlue": "#65A8FF",
+    "pink": "#F26BFF"
+  },
+  "opacity": {
+    "borderSoft": 0.075,
+    "borderDefault": 0.09,
+    "borderStrong": 0.14,
+    "textSecondaryMin": 0.42,
+    "textSecondaryMax": 0.58,
+    "textTertiaryMin": 0.24,
+    "textTertiaryMax": 0.34
+  },
+  "gradients": {
+    "brandHairline": ["#7357FF", "#67A8FF", "#E16CFF"],
+    "displayText": ["#FFFFFF", "#B8AAFF", "#69B4FF", "#F08CFF"],
+    "signature": {
+      "flow": ["#B2A6FF", "#765CFF"],
+      "ocean": ["#6EC5FF", "#5869FF"],
+      "aurora": ["#8268FF", "#DF6FFF"],
+      "rose": ["#DB6FFF", "#FF789B"]
+    }
+  },
+  "typography": {
+    "displayStack": "-apple-system, BlinkMacSystemFont, SF Pro Display, SF Pro Text, Helvetica Neue, Segoe UI Variable Display, Arial, sans-serif",
+    "monoStack": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+    "displayTrackingEm": -0.052,
+    "displayLineHeight": 0.96,
+    "displayWeightTypical": 560
+  },
+  "geometry": {
+    "controlRadiusPx": [8, 12, 16],
+    "largeContainerRadiusPx": [20, 26, 28]
+  },
+  "motion": {
+    "houseEase": [0.16, 1, 0.3, 1],
+    "principles": [
+      "fast but controlled",
+      "transform and opacity first",
+      "use blur mainly in transitions",
+      "minimal spring overshoot",
+      "one dominant motion per beat"
+    ]
+  },
+  "visualRules": {
+    "defaultBackground": "near-black",
+    "defaultPrimaryText": "crisp white",
+    "accentUsage": "selection, focus, active energy and highlights",
+    "glowUsage": "restrained",
+    "uiDensity": "compact and precise",
+    "socialLegibility": "all essential content must read at phone size"
+  }
+}

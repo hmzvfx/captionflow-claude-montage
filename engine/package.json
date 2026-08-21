@@ -1,0 +1,13 @@
+{
+  "name": "captionflow-ai-production-engine",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=20"},
+  "scripts": {
+    "start": "node src/index.js",
+    "worker": "node src/worker.js --once",
+    "self-test": "node src/self-test.js",
+    "check": "node --check src/util.js && node --check src/google.js && node --check src/gemini.js && node --check src/assemble.js && node --check src/worker.js && node --check src/server.js && node --check src/index.js && node --check src/self-test.js"
+  }
+}

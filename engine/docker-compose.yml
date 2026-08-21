@@ -1,0 +1,11 @@
+services:
+  engine:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8080:8080"
+    volumes:
+      - captionflow_media:/data/media
+volumes:
+  captionflow_media:

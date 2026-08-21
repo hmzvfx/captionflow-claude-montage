@@ -20,13 +20,19 @@ async function main(){
   routerTests();
   const root=await ensureDir('/tmp/captionflow-self-test'); process.env.MEDIA_ROOT=root; process.env.PUBLIC_MEDIA_BASE_URL='';
   const a=path.join(root,'a.mp4'),b=path.join(root,'b.mp4'),m=path.join(root,'music.wav');
-  await run('ffmpeg',['-y','-f','lavfi','-i','color=c=black:s=720x1280:r=24:d=1.5','-f','lavfi','-i','sine=frequency=440:duration=1.5','-shortest','-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac',a]);
-  await run('ffmpeg',['-y','-f','lavfi','-i','color=c=gray:s=720x1280:r=24:d=1.5','-f','lavfi','-i','sine=frequency=550:duration=1.5','-shortest','-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac',b]);
+  await run('ffmpeg',['-y','-f','lavfi','-i','color=c=black:s=720x1280:r=24:d=4','-f','lavfi','-i','sine=frequency=440:duration=4','-shortest','-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac',a]);
+  await run('ffmpeg',['-y','-f','lavfi','-i','color=c=gray:s=720x1280:r=24:d=4','-f','lavfi','-i','sine=frequency=550:duration=4','-shortest','-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac',b]);
   await run('ffmpeg',['-y','-f','lavfi','-i','sine=frequency=160:duration=4',m]);
-  const out=await assemble('SELFTEST',[{'Source URL':a,'Trim in':0,'Trim out':1.2,Speed:1,'Overlay text':'CAPTIONFLOW','Audio gain dB':-2,'Music cue':m,'SFX':m},{'Source URL':b,'Trim in':0.1,'Trim out':1.3,Speed:1.1,'Overlay text':'READY','Audio gain dB':-2,'Music cue':''}],{width:1080,height:1920,fps:30});
-  const p=await probe(out.master); const video=p.streams?.find(s=>s.codec_type==='video');
+  const timeline=[
+    {'Source URL':a,'Trim in':'0','Trim out':'0,7',Speed:1,'Overlay text':'CAPTIONFLOW','Audio gain dB':-2,'Music cue':m,'SFX':''},
+    {'Source URL':b,'Trim in':'0,1','Trim out':'1,3',Speed:1.1,'Overlay text':'READY','Audio gain dB':-2,'Music cue':'','SFX':''}
+  ];
+  const expected=0.7+(1.2/1.1);
+  const out=await assemble('SELFTEST',timeline,{width:1080,height:1920,fps:30});
+  const p=await probe(out.master); const video=p.streams?.find(s=>s.codec_type==='video'); const actual=Number(p.format?.duration||0);
   assert(video?.width===1080&&video?.height===1920,`Bad output ${video?.width}x${video?.height}`);
+  assert(Math.abs(actual-expected)<0.20,`Trim regression: expected ~${expected.toFixed(3)}s, got ${actual.toFixed(3)}s`);
   await fs.access(out.thumb);
-  console.log(JSON.stringify({ok:true,router:true,master:out.master,thumbnail:out.thumb,duration:p.format?.duration},null,2));
+  console.log(JSON.stringify({ok:true,router:true,master:out.master,thumbnail:out.thumb,expectedDuration:expected,duration:actual},null,2));
 }
 main().catch(e=>{console.error(e);process.exit(1)});

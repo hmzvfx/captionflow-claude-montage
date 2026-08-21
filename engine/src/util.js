@@ -4,10 +4,15 @@ import { spawn } from 'node:child_process';
 
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
 export const nowIso = () => new Date().toISOString();
-export const num = (v, d=0) => Number.isFinite(Number(v)) ? Number(v) : d;
+export const num = (v, d=0) => {
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  const normalized=String(v ?? '').trim().replace(/\s/g,'').replace(',','.');
+  const n=Number(normalized);
+  return Number.isFinite(n) ? n : d;
+};
 export const bool = (v, d=false) => v === true || String(v).toLowerCase()==='true' ? true : v === false || String(v).toLowerCase()==='false' ? false : d;
 export const safe = s => String(s ?? '').trim().replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,120) || 'item';
-export const parseSeconds = s => { const m=String(s??'').match(/([0-9]+(?:\.[0-9]+)?)/); return m ? Number(m[1]) : 0; };
+export const parseSeconds = s => { const m=String(s??'').replace(',','.').match(/([0-9]+(?:\.[0-9]+)?)/); return m ? Number(m[1]) : 0; };
 export const splitUrls = s => String(s??'').split(/[|\n]+/).map(x=>x.trim()).filter(Boolean);
 export const ensureDir = async p => { await fs.mkdir(p,{recursive:true}); return p; };
 export const mediaRoot = () => process.env.MEDIA_ROOT || '/data/media';

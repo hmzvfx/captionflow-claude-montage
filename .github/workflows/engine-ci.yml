@@ -1,0 +1,32 @@
+name: Captionflow AI Engine CI
+
+on:
+  pull_request:
+    paths:
+      - 'engine/**'
+      - '.github/workflows/engine-ci.yml'
+      - '.github/workflows/engine-deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Syntax check
+        working-directory: engine
+        run: npm run check
+      - name: Router and renderer self-test
+        working-directory: engine
+        run: npm run self-test

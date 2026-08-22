@@ -10,14 +10,11 @@ export async function generateImage({model,prompt,sources=[],aspectRatio='9:16',
 function inlineImage(buf,mime='image/png'){return {inlineData:{mimeType:mime,data:buf.toString('base64')}}}
 export async function generateVideo({model,prompt,mode='T2V',firstImage,lastImage,references=[],extendVideo,aspectRatio='9:16',resolution='720p',duration=4}){
  const instance={prompt};
- // Route isolation: T2V must never inherit an available first-frame asset.
  if((mode==='I2V'||mode==='INTERPOLATION')&&firstImage)instance.image=inlineImage(firstImage.buffer,firstImage.mime);
  if(mode==='INTERPOLATION'&&lastImage)instance.lastFrame=inlineImage(lastImage.buffer,lastImage.mime);
  if(mode==='REF'&&references.length)instance.referenceImages=references.slice(0,3).map(x=>({image:inlineImage(x.buffer,x.mime),referenceType:'asset'}));
  if(mode==='EXTEND'&&extendVideo)instance.video={inlineData:{mimeType:'video/mp4',data:extendVideo.toString('base64')}};
- // EU Veo 3.1 deployments use adult-only person generation.
- const personGeneration='allow_adult';
- // Current Gemini Veo API expects durationSeconds as a number and does not accept numberOfVideos.
+ const personGeneration=mode==='T2V'||mode==='EXTEND'?'allow_all':'allow_adult';
  const parameters={aspectRatio,resolution,durationSeconds:Number(duration),personGeneration};
  if(mode==='EXTEND'){parameters.resolution='720p';parameters.durationSeconds=8;}
  const start=await gj(`${base}/models/${model}:predictLongRunning`,{method:'POST',body:JSON.stringify({instances:[instance],parameters})}); if(!start.name)throw new Error(`Veo operation missing name: ${JSON.stringify(start)}`); let op=start; while(!op.done){ await sleep(10000); op=await gj(`${base}/${start.name}`); }

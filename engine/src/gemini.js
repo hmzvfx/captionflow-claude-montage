@@ -10,15 +10,16 @@ export async function generateImage({model,prompt,sources=[],aspectRatio='9:16',
 function inlineImage(buf,mime='image/png'){return {inlineData:{mimeType:mime,data:buf.toString('base64')}}}
 export async function generateVideo({model,prompt,mode='T2V',firstImage,lastImage,references=[],extendVideo,aspectRatio='9:16',resolution='720p',duration=4}){
  const instance={prompt};
- // Never leak assets into a text-only request. Each Veo route gets only the inputs supported by that route.
+ // Route isolation: T2V must never inherit an available first-frame asset.
  if((mode==='I2V'||mode==='INTERPOLATION')&&firstImage)instance.image=inlineImage(firstImage.buffer,firstImage.mime);
  if(mode==='INTERPOLATION'&&lastImage)instance.lastFrame=inlineImage(lastImage.buffer,lastImage.mime);
  if(mode==='REF'&&references.length)instance.referenceImages=references.slice(0,3).map(x=>({image:inlineImage(x.buffer,x.mime),referenceType:'asset'}));
  if(mode==='EXTEND'&&extendVideo)instance.video={inlineData:{mimeType:'video/mp4',data:extendVideo.toString('base64')}};
- // The engine is deployed for an EU account; Veo 3.1 regional policy allows adult generation only.
+ // EU Veo 3.1 deployments use adult-only person generation.
  const personGeneration='allow_adult';
- const parameters={aspectRatio,resolution,durationSeconds:String(duration),personGeneration,numberOfVideos:1};
- if(mode==='EXTEND'){parameters.resolution='720p';parameters.durationSeconds='8';}
+ // Current Gemini Veo API expects durationSeconds as a number and does not accept numberOfVideos.
+ const parameters={aspectRatio,resolution,durationSeconds:Number(duration),personGeneration};
+ if(mode==='EXTEND'){parameters.resolution='720p';parameters.durationSeconds=8;}
  const start=await gj(`${base}/models/${model}:predictLongRunning`,{method:'POST',body:JSON.stringify({instances:[instance],parameters})}); if(!start.name)throw new Error(`Veo operation missing name: ${JSON.stringify(start)}`); let op=start; while(!op.done){ await sleep(10000); op=await gj(`${base}/${start.name}`); }
  if(op.error)throw new Error(`Veo failed: ${JSON.stringify(op.error)}`); const sample=op.response?.generateVideoResponse?.generatedSamples?.[0] || op.response?.generatedVideos?.[0]; const uri=sample?.video?.uri || sample?.video?.videoUri || sample?.uri; if(!uri)throw new Error(`Veo output URI missing: ${JSON.stringify(op).slice(0,3000)}`); const r=await fetch(uri,{headers:{'x-goog-api-key':key()},redirect:'follow'}); if(!r.ok)throw new Error(`Veo download ${r.status}`); return {operation:start.name,providerUri:uri,bytes:Buffer.from(await r.arrayBuffer())}; }
 export async function uploadGeminiFile(filePath,mime='video/mp4'){ const st=await fs.stat(filePath); const start=await fetch(`${base.replace('/v1beta','')}/upload/v1beta/files?key=${encodeURIComponent(key())}`,{method:'POST',headers:{'X-Goog-Upload-Protocol':'resumable','X-Goog-Upload-Command':'start','X-Goog-Upload-Header-Content-Length':String(st.size),'X-Goog-Upload-Header-Content-Type':mime,'Content-Type':'application/json'},body:JSON.stringify({file:{display_name:safe(path.basename(filePath))}})}); if(!start.ok)throw new Error(`Gemini file start ${start.status}: ${await start.text()}`); const uploadUrl=start.headers.get('x-goog-upload-url'); if(!uploadUrl)throw new Error('Gemini upload URL missing'); const data=await fs.readFile(filePath); const up=await fetch(uploadUrl,{method:'POST',headers:{'Content-Length':String(data.length),'X-Goog-Upload-Offset':'0','X-Goog-Upload-Command':'upload, finalize'},body:data}); let j=await up.json(); if(!up.ok)throw new Error(`Gemini upload ${up.status}: ${JSON.stringify(j)}`); let f=j.file; while(f?.state==='PROCESSING'){await sleep(3000); f=await gj(`${base}/${f.name}`);} if(f?.state==='FAILED')throw new Error(`Gemini file processing failed: ${JSON.stringify(f)}`); return f; }
